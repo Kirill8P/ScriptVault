@@ -1,0 +1,67 @@
+Sub regExExample()
+
+Dim regEx As Object
+Dim matches As Object
+Dim match As Object
+Dim inputData() As String
+Dim outputData() As String
+Dim lastRow As Long
+Dim result As String
+Dim resultString As String
+    
+    
+    'For example, a regex with a lazy quantifier, matching proper opening/closing tags, first occurrence only, non-empty
+    'Process the array with the regex
+    'Output the processed array to the third column of Sheet1
+    
+    'Define the last row in Sheet1
+    'Определим последнюю строку на листе1
+    lastRow = Sheets("Sheet1").Cells(Rows.Count, 1).End(xlUp).Row
+    
+    'Determine the array size based on the number of rows
+    'Определим размер массива в зависимости от количества строк
+    ReDim inputData(1 To lastRow)
+    
+    'Load data from the first column of Sheet1 into the array
+    'Загоним данные из первого столбца с листа1 в массив
+    For i = 1 To UBound(inputData)
+        inputData(i) = Sheets("Sheet1").Cells(i, 1).Value
+    Next i
+    
+    'Create a regular expression object
+    'Создадим объект регулярка
+    Set regEx = CreateObject("VBScript.regExp")
+    
+    'For example, a regex with a lazy quantifier that matches proper opening and closing HTML-like tags
+    'with the same tag name (e.g., <tag>content</tag>), ensuring the tags are non-nested and the content is not empty
+    'Например, регулярка с ленивожадным квантификатором, корректные
+    'открывающие/закрывающие теги, только первые, непустые
+    regEx.Pattern = "<(\w+?)>[^<]+</\1>"
+    regEx.IgnoreCase = True
+    regEx.Global = True
+    
+    'Process the array with the regex
+    'Обработаем массив нашей регуляркой
+    ReDim outputData(1 To UBound(inputData))
+    resultIndex = 1
+    For i = LBound(inputData) To UBound(inputData)
+        resultString = ""
+        If regEx.Test(inputData(i)) Then
+            Set matches = regEx.Execute(inputData(i))
+            For Each match In matches
+                resultString = resultString & match.Value & "; "
+            Next match
+            If Len(resultString) > 0 Then
+                resultString = Left(resultString, Len(resultString) - 2)
+            End If
+        End If
+        outputData(i) = resultString
+    Next i
+    
+    'Output the processed array to the third column of Sheet1
+    'Выведем полученный после обработки массив в третьем столбце листа1
+    For i = LBound(outputData) To UBound(outputData)
+        Sheets("Sheet1").Cells(i, 3).Value = outputData(i)
+    Next i
+
+End Sub
